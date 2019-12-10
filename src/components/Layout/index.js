@@ -1,30 +1,31 @@
-import React, { useState, useCallback} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Layout, Menu } from 'antd';
-import { Button } from "antd";
+import LoginForm from '../LoginForm.jsx';
 import "antd/dist/antd.css";
 const { Header, Content, Footer} = Layout;
 
 export default ({children}) => {
-  const [visible, setVisible] = useState(false);
-  const [formRef, setFormRef] = useState(null);
+  const [ showModal, setShowModal ] = useState(false);
+  const formRef = useRef();
+
+  const handleCancel = () => {
+    setShowModal(false);
+  };
 
   const handleCreate = () => {
-    formRef.validateFields((err, values) => {
+    let form = formRef.current.form;
+    
+    form.validateFields((err, values) => {
       if (err) {
+        console.log("Error: ", values);
         return;
       }
-
       console.log("Received values of form: ", values);
-      formRef.resetFields();
-      setVisible(false);
+      form.resetFields();
+      setShowModal(false);
     });
   };
 
-  const saveFormRef = useCallback(node => {
-    if (node !== null) {
-      setFormRef(node);
-    }
-  }, []);
 
   return (
     <Layout>
@@ -36,9 +37,13 @@ export default ({children}) => {
         defaultSelectedKeys={['1']}
         style={{ lineHeight: '64px' }}
       >
-        <Button style={{float: "left"}} type="primary" onClick={() => setVisible(true)}>
-          Log in
-        </Button>
+        <Menu.Item key="1" style={{ float: "left" }} onClick={() => setShowModal(true)}>Log In</Menu.Item>
+        <LoginForm
+            visible={showModal}
+            onCancel={handleCancel}
+            onCreate={handleCreate}
+            wrappedComponentRef={formRef}
+        />
       </Menu>
     </Header>
     <Content style={{ padding: '0 50px', marginTop: 64 }}>
@@ -55,5 +60,5 @@ export default ({children}) => {
     <Footer style={{ textAlign: 'center', bottom: "100px"}}>Ant Design ©2018 Created by Ant UED</Footer>
     </Layout>
   );
-}
+};
 
